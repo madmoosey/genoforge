@@ -14,6 +14,7 @@ def gc_fraction(sequence: bytes) -> float:
 
     Borrows the bytes buffer without copying and releases the GIL while computing.
     """
+
 @final
 class FastqStats:
     """QC summary for one FASTQ file. Immutable (attributes are read-only)."""

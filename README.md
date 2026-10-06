@@ -56,8 +56,8 @@ The same core from Python, with the GIL released while Rust works:
 from genoforge import fastq_stats
 
 stats = fastq_stats("reads.fastq.gz", threads=8)
-stats.q30_frac, stats.dup_frac_est   # typed attributes
-stats.to_dict()                       # plain dict for JSON / a JSONField
+stats.q30_frac, stats.dup_frac_est  # typed attributes
+stats.to_dict()  # plain dict for JSON / a JSONField
 ```
 
 The FASTQ path is streaming (one batch of records in memory at a time), sniffs
