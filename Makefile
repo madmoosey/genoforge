@@ -5,7 +5,7 @@ SHELL := /bin/bash
 VENV ?= .venv
 PY   := $(VENV)/bin/python
 
-.PHONY: help setup develop test test-rust test-py lint fmt up down clean docker-test
+.PHONY: help setup develop test test-rust test-py lint fmt bench up down clean docker-test
 
 help: ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -36,6 +36,9 @@ fmt: ## apply rustfmt + ruff formatting
 	cargo fmt --all
 	$(PY) -m ruff format .
 	$(PY) -m ruff check --fix .
+
+bench: ## criterion benchmarks (reports in target/criterion)
+	cargo bench -p genoforge-core
 
 up: ## start postgres + mongo
 	docker compose up -d --wait

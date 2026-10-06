@@ -1,0 +1,16 @@
+@r1 first read
+ACGTACGTAC
++
+IIIIIIIIII
+@r2
+GGGGCCCCNN
++r2
+5555555555
+@r3 duplicate of r1
+ACGTACGTAC
++
+IIIIIIIIII
+@r4
+AT
++
+!!
