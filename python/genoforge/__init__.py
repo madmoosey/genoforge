@@ -5,7 +5,7 @@ The compiled extension lives at ``genoforge._native`` (built by maturin from
 here re-implements what the Rust core already does.
 """
 
-from genoforge._native import core_version, gc_fraction
+from genoforge._native import FastqStats, core_version, fastq_stats, gc_fraction
 
-__all__ = ["__version__", "core_version", "gc_fraction"]
+__all__ = ["FastqStats", "__version__", "core_version", "fastq_stats", "gc_fraction"]
 __version__ = "0.1.0"
