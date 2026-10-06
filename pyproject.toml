@@ -13,16 +13,23 @@ classifiers = [
   "Programming Language :: Rust",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: Implementation :: CPython",
+  "Framework :: Django :: 5",
   "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-dependencies = []
+dependencies = [
+  "django>=5.1,<6",
+  "django-environ>=0.11",
+  "psycopg[binary]>=3.2",
+]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8",
+  "pytest-django>=4.9",
   "hypothesis>=6",
-  "ruff>=0.6",
+  "ruff==0.16.10",
   "mypy>=1.11",
+  "django-stubs[compatible-mypy]>=5.1",
 ]
 
 [project.urls]
@@ -37,17 +44,37 @@ features = ["pyo3/extension-module"]
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
 addopts = "-ra -q"
+DJANGO_SETTINGS_MODULE = "genoforge.settings.test"
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 src = ["python", "tests"]
+extend-exclude = ["**/migrations/*"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "N"]
+select = ["E", "F", "I", "UP", "B", "SIM", "N", "DJ"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 mypy_path = "python"
 packages = ["genoforge"]
+plugins = ["mypy_django_plugin.main"]
+
+[[tool.mypy.overrides]]
+module = "genoforge.apps.*.migrations.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# django-environ ships no stubs
+module = "environ"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# admin.ModelAdmin is only generic in the stubs, not at runtime
+module = "genoforge.apps.*.admin"
+disallow_any_generics = false
+
+[tool.django-stubs]
+django_settings_module = "genoforge.settings.test"

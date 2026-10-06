@@ -2,8 +2,9 @@
 #
 # Stages:
 #   builder  - Rust toolchain + maturin; runs cargo tests and builds the wheel
-#   runtime  - slim Python with only the wheel installed (what gets deployed)
-#   test     - runtime + pytest; `docker build --target test .` is the no-toolchain test path
+#   runtime  - slim Python with the wheel (and its Django deps) installed
+#   test     - runtime + pytest; runs the unit suite (no database needed).
+#              Integration tests need Postgres and run in CI / `make test-py`.
 
 ARG PYTHON_VERSION=3.13
 
@@ -32,12 +33,14 @@ COPY --from=builder /wheels /wheels
 RUN pip install --no-cache-dir /wheels/*.whl && rm -rf /wheels
 USER app
 WORKDIR /home/app
+ENV DJANGO_SETTINGS_MODULE=genoforge.settings.prod
 CMD ["python", "-c", "import genoforge; print(genoforge.core_version())"]
 
 FROM runtime AS test
 USER root
-RUN pip install --no-cache-dir "pytest>=8" "hypothesis>=6"
+RUN pip install --no-cache-dir "pytest>=8" "pytest-django>=4.9" "hypothesis>=6"
 USER app
 COPY --chown=app pyproject.toml ./
 COPY --chown=app tests ./tests
-RUN python -m pytest
+ENV DJANGO_SETTINGS_MODULE=genoforge.settings.test
+RUN python -m pytest tests/python/unit
