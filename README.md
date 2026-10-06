@@ -50,6 +50,16 @@ cargo run --release -p genoforge-cli -- fastq-stats reads.fastq.gz | jq
 make bench            # criterion: fastq_stats throughput, 1 thread vs all cores
 ```
 
+The same core from Python, with the GIL released while Rust works:
+
+```python
+from genoforge import fastq_stats
+
+stats = fastq_stats("reads.fastq.gz", threads=8)
+stats.q30_frac, stats.dup_frac_est   # typed attributes
+stats.to_dict()                       # plain dict for JSON / a JSONField
+```
+
 The FASTQ path is streaming (one batch of records in memory at a time), sniffs
 gzip from the magic bytes, parallelises across a rayon pool with one
 accumulator per task and no locks, and estimates the duplicate-read fraction
