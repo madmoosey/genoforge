@@ -40,9 +40,20 @@ make lint             # rustfmt, clippy (pedantic), ruff, mypy
 ```
 
 ```bash
-cargo run -p genoforge-cli -- gc ACGTNN
-# {"gc_fraction":0.5}
+cargo run --release -p genoforge-cli -- fastq-stats reads.fastq.gz | jq
+# {
+#   "total_reads": 1000000, "total_bases": 150000000, "min_len": 150, "max_len": 150,
+#   "mean_len": 150.0, "mean_qual": 35.2, "gc_frac": 0.41, "n_frac": 0.0002,
+#   "q20_frac": 0.98, "q30_frac": 0.93, "dup_frac_est": 0.07,
+#   "per_position_mean_qual": [36.1, 36.0, ...]
+# }
+make bench            # criterion: fastq_stats throughput, 1 thread vs all cores
 ```
+
+The FASTQ path is streaming (one batch of records in memory at a time), sniffs
+gzip from the magic bytes, parallelises across a rayon pool with one
+accumulator per task and no locks, and estimates the duplicate-read fraction
+from a bottom-k sketch in `O(k)` memory.
 
 ## Layout
 

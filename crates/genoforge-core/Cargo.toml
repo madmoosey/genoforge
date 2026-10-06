@@ -9,8 +9,19 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
+flate2.workspace = true
+rayon.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+proptest.workspace = true
+serde_json.workspace = true
+
+[[bench]]
+name = "fastq"
+harness = false
 
 [lints]
 workspace = true

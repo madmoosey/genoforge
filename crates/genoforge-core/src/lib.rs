@@ -4,14 +4,15 @@
 //! `Result`-based error handling so it can be driven from the CLI, from the
 //! `PyO3` bindings in `genoforge-py`, or from tests, identically.
 //!
-//! Module map (filled in by later PRs):
-//! - `fastq`    streaming FASTQ parser and QC accumulators
-//! - `kmer`     2-bit packed k-mers and `MinHash` duplicate-rate estimate
-//! - `bam`      BAM/CRAM mapping statistics (via `noodles`)
-//! - `vcf`      VCF record model, Ti/Tv, het/hom, document conversion
-//! - `simulate` seeded read simulator with planted SNVs
+//! Module map:
+//! - [`fastq`]  streaming FASTQ reader, QC accumulator, parallel driver
+//! - `kmer`     2-bit packed k-mers (planned)
+//! - `bam`      BAM/CRAM mapping statistics (planned)
+//! - `vcf`      VCF record model and statistics (planned)
+//! - `simulate` seeded read simulator with planted SNVs (planned)
 
 pub mod error;
+pub mod fastq;
 
 pub use error::{Error, Result};
 
@@ -27,8 +28,8 @@ pub fn version() -> &'static str {
 /// Returns `0.0` for a sequence with no A/C/G/T bases at all.
 #[must_use]
 pub fn gc_fraction(seq: &[u8]) -> f64 {
-    let mut gc = 0usize;
-    let mut acgt = 0usize;
+    let mut gc = 0u64;
+    let mut acgt = 0u64;
     for &b in seq {
         match b {
             b'G' | b'g' | b'C' | b'c' => {
@@ -39,14 +40,19 @@ pub fn gc_fraction(seq: &[u8]) -> f64 {
             _ => {}
         }
     }
-    if acgt == 0 {
+    frac(gc, acgt)
+}
+
+/// `num / den` as a float, or `0.0` when `den` is zero.
+///
+/// Precision loss only matters past 2^53, which no per-file counter reaches.
+#[must_use]
+#[allow(clippy::cast_precision_loss)]
+pub(crate) fn frac(num: u64, den: u64) -> f64 {
+    if den == 0 {
         0.0
     } else {
-        // Precision loss only matters past 2^53 bases; a single read never gets there.
-        #[allow(clippy::cast_precision_loss)]
-        {
-            gc as f64 / acgt as f64
-        }
+        num as f64 / den as f64
     }
 }
 
