@@ -1,12 +1,15 @@
 services:
+  # Local development stack only: both services bind to loopback and Postgres
+  # uses trust auth, so there are no credentials to manage or leak. Deployed
+  # environments inject DATABASE_URL / MONGO_URL from the platform's secret store.
   postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: genoforge
-      POSTGRES_PASSWORD: genoforge
       POSTGRES_DB: genoforge
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${GENOFORGE_PG_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +21,7 @@ services:
   mongo:
     image: mongo:7
     ports:
-      - "127.0.0.1:27017:27017"
+      - "127.0.0.1:${GENOFORGE_MONGO_PORT:-27017}:27017"
     volumes:
       - mongodata:/data/db
     healthcheck:

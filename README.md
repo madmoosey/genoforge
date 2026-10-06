@@ -24,8 +24,11 @@ No local toolchain (Docker only):
 
 ```bash
 make docker-test      # builds the Rust core + wheel, runs cargo test and pytest inside the image
-make up               # postgres + mongo
+make up               # postgres + mongo on 127.0.0.1 (trust auth, dev only)
 ```
+
+If 5432 or 27017 is already taken on your machine, set `GENOFORGE_PG_PORT` /
+`GENOFORGE_MONGO_PORT` before `make up`.
 
 Native development (Rust via rustup, Python via uv):
 
