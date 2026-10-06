@@ -1,0 +1,22 @@
+[package]
+name = "genoforge-cli"
+description = "Command-line interface for genoforge"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "genoforge"
+path = "src/main.rs"
+
+[dependencies]
+genoforge-core.workspace = true
+anyhow.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

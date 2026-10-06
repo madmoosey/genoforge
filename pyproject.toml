@@ -1,0 +1,53 @@
+[build-system]
+requires = ["maturin>=1.8,<2"]
+build-backend = "maturin"
+
+[project]
+name = "genoforge"
+version = "0.1.0"
+description = "Rust-accelerated genomics QC pipeline with a Django control plane"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "hypothesis>=6",
+  "ruff>=0.6",
+  "mypy>=1.11",
+]
+
+[project.urls]
+Repository = "https://github.com/madmoosey/genoforge"
+
+[tool.maturin]
+python-source = "python"
+module-name = "genoforge._native"
+manifest-path = "crates/genoforge-py/Cargo.toml"
+features = ["pyo3/extension-module"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+addopts = "-ra -q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["python", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "N"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "python"
+packages = ["genoforge"]
