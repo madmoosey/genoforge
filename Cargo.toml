@@ -1,0 +1,31 @@
+[workspace]
+resolver = "2"
+members = ["crates/genoforge-core", "crates/genoforge-cli", "crates/genoforge-py"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+repository = "https://github.com/madmoosey/genoforge"
+authors = ["madmoosey"]
+
+[workspace.dependencies]
+genoforge-core = { path = "crates/genoforge-core" }
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

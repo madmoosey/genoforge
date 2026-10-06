@@ -1,0 +1,21 @@
+[package]
+name = "genoforge-py"
+description = "PyO3 bindings exposing genoforge-core to Python as genoforge._native"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+
+[lib]
+name = "_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+genoforge-core.workspace = true
+pyo3 = { version = "0.29", features = ["abi3-py312"] }
+
+[lints]
+workspace = true
