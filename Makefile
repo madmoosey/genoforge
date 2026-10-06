@@ -5,7 +5,8 @@ SHELL := /bin/bash
 VENV ?= .venv
 PY   := $(VENV)/bin/python
 
-.PHONY: help setup develop test test-rust test-py lint fmt up down clean docker-test
+.PHONY: help setup develop test test-rust test-py test-unit lint fmt bench up down clean docker-test \
+        migrate makemigrations runserver superuser
 
 help: ## list targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -17,25 +18,32 @@ setup: ## create the venv and install the package (builds the Rust extension) + 
 develop: ## rebuild the Rust extension in place after editing crates/
 	uv run --python $(PY) maturin develop --release
 
-test: test-rust test-py ## run everything
+test: test-rust test-py ## run everything (needs `make up` for the integration tests)
 
 test-rust: ## cargo tests for all crates
 	cargo test --workspace
 
-test-py: ## pytest against the installed extension
+test-py: ## pytest: unit + integration (integration needs Postgres from `make up`)
 	$(PY) -m pytest
 
-lint: ## clippy (pedantic, deny warnings), rustfmt check, ruff, mypy
+test-unit: ## pytest: unit tests only, no services needed
+	$(PY) -m pytest tests/python/unit
+
+lint: ## clippy (pedantic, deny warnings), rustfmt check, ruff, mypy, migration drift
 	cargo fmt --all --check
 	cargo clippy --workspace --all-targets -- -D warnings
 	$(PY) -m ruff check .
 	$(PY) -m ruff format --check .
 	$(PY) -m mypy
+	$(PY) manage.py makemigrations --check --dry-run
 
 fmt: ## apply rustfmt + ruff formatting
 	cargo fmt --all
 	$(PY) -m ruff format .
 	$(PY) -m ruff check --fix .
+
+bench: ## criterion benchmarks (reports in target/criterion)
+	cargo bench -p genoforge-core
 
 up: ## start postgres + mongo
 	docker compose up -d --wait
@@ -43,8 +51,20 @@ up: ## start postgres + mongo
 down: ## stop services (keeps volumes)
 	docker compose down
 
-docker-test: ## build the image and run the Rust + Python test suites inside it (no local toolchain needed)
+migrate: ## apply Django migrations to the compose Postgres
+	$(PY) manage.py migrate
+
+makemigrations: ## generate migrations after a model change
+	$(PY) manage.py makemigrations
+
+runserver: ## Django dev server on :8000 (admin at /admin)
+	$(PY) manage.py runserver
+
+superuser: ## create an admin login
+	$(PY) manage.py createsuperuser
+
+docker-test: ## build the image and run the Rust + Python unit suites inside it (no local toolchain needed)
 	docker build --target test -t genoforge:test .
 
 clean: ## remove build artefacts
-	rm -rf target $(VENV) .pytest_cache .mypy_cache .ruff_cache .hypothesis
+	rm -rf target $(VENV) .pytest_cache .mypy_cache .ruff_cache .hypothesis staticfiles

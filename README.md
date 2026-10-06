@@ -23,7 +23,7 @@ is *correct*, not just that it ran.
 No local toolchain (Docker only):
 
 ```bash
-make docker-test      # builds the Rust core + wheel, runs cargo test and pytest inside the image
+make docker-test      # builds the Rust core + wheel, runs cargo test and the Python unit suite inside the image
 make up               # postgres + mongo on 127.0.0.1 (trust auth, dev only)
 ```
 
@@ -35,8 +35,10 @@ Native development (Rust via rustup, Python via uv):
 ```bash
 curl https://sh.rustup.rs -sSf | sh
 make setup            # uv venv + maturin build of the extension + dev tools
-make test             # cargo test + pytest
-make lint             # rustfmt, clippy (pedantic), ruff, mypy
+make up && make migrate && make superuser
+make runserver        # Django admin at http://127.0.0.1:8000/admin
+make test             # cargo test + pytest (integration tests use the compose Postgres)
+make lint             # rustfmt, clippy (pedantic), ruff, mypy, migration drift
 ```
 
 ```bash
@@ -50,9 +52,9 @@ cargo run -p genoforge-cli -- gc ACGTNN
 crates/genoforge-core   pure Rust library: parsing, QC, simulation
 crates/genoforge-cli    `genoforge` binary, JSON output
 crates/genoforge-py     PyO3 bindings → genoforge._native
-python/genoforge        Python package (Django project arrives in PR 4)
+python/genoforge        Django project: settings/, apps/samples, apps/runs (models, migrations, admin)
 tests/python            unit / integration / e2e
-docs/                   architecture, ADRs, schema, runbook, benchmarks
+docs/                   architecture, ADRs, SCHEMA.md, runbook, benchmarks
 ```
 
 ## License

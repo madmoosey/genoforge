@@ -27,3 +27,6 @@ data/work/
 # Local
 .env
 .DS_Store
+
+# Django
+staticfiles/
